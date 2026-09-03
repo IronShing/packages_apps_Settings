@@ -20,6 +20,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
@@ -85,9 +86,38 @@ public final class PeriodicJobManager {
     @WorkerThread
     private void scheduleNextJobAlarm(
             final boolean fromBoot, final PendingIntent pendingIntent) {
+        // NX809J: this alarm is the single largest idle waker on a stock build. It is
+        // scheduled with setExactAndAllowWhileIdle(), an alarm class Doze is NOT permitted to
+        // defer, so no device_idle_constants tuning can touch it -- measured on a user dump as
+        // 166 of 178 wakeups and 97% of total wake time over 22h30m, purely to refresh the
+        // battery usage chart. persist.sys.rm.batteryjob_hours: 1 = stock hourly (default),
+        // N = every N hours, 0 = never schedule. Exposed as "Battery stats refresh" in
+        // RedMagic Control; Settings may read it because persist.sys.rm. maps to rm_ctrl_prop
+        // and set_prop(system_app, rm_ctrl_prop) already exists.
+        // This alarm is the largest idle waker on the device (166 of 178 wake-ups on a real dump)
+        // and it is scheduled setExactAndAllowWhileIdle, so Doze is not allowed to defer it.
+        //
+        // It is only stretched for users who have opted into "Sleep harder when offline" -- that
+        // switch is what reveals the control in RedMagic Control, so nobody gets a coarser battery
+        // chart without having seen the setting that caused it. Stock hourly otherwise.
+        final boolean dozeOptIn = SystemProperties.getBoolean("persist.sys.rm.doze_offline", false);
+        final int everyHours = dozeOptIn
+                ? SystemProperties.getInt("persist.sys.rm.batteryjob_hours", 6)
+                : 1;
+        if (everyHours <= 0) {
+            BatteryUsageLogUtils.writeLog(
+                    mContext, Action.SCHEDULE_JOB,
+                    "next alarm job disabled by persist.sys.rm.batteryjob_hours=0");
+            Log.d(TAG, "next alarm job disabled by persist.sys.rm.batteryjob_hours");
+            return;
+        }
         final long currentTimeMillis = System.currentTimeMillis();
         // Uses the timestamp of next full hour in local timezone.
-        final long triggerAtMillis = getTriggerAtMillis(currentTimeMillis, fromBoot);
+        long triggerAtMillis = getTriggerAtMillis(currentTimeMillis, fromBoot);
+        // Push out to the next Nth hour boundary, keeping the sharp-hour alignment.
+        for (int i = 1; i < everyHours; i++) {
+            triggerAtMillis = TimestampUtils.getNextHourTimestamp(triggerAtMillis);
+        }
         mAlarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
         final String timeForLogging = ConvertUtils.utcToLocalTimeForLogging(triggerAtMillis);
