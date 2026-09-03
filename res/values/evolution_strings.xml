@@ -111,6 +111,10 @@
     <!-- IME button space -->
     <string name="show_ime_space_title">Show IME button space</string>
     <string name="show_ime_space_summary">Enable the input method quick switch feature to switch input methods or hide the on-screen keyboard from the feature bar at the bottom of the screen when typing</string>
+    <string name="ime_back_position_title">Hide keyboard button position</string>
+    <string name="ime_back_position_left">Left</string>
+    <string name="ime_back_position_right">Right</string>
+    <string name="ime_back_position_both">Both sides</string>
 
     <!-- Reality Display Engine -->
     <string name="display_engine_category">Display engine</string>
