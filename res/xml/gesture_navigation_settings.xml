@@ -47,6 +47,16 @@
         android:summary="@string/show_ime_space_summary"
         android:defaultValue="true" />
 
+    <!-- Where the "hide keyboard" chevron sits in the IME button space -->
+    <org.evolution.settings.preferences.SecureSettingListPreference
+        android:key="sysui_nav_bar_ime_back_position"
+        android:title="@string/ime_back_position_title"
+        android:entries="@array/ime_back_position_entries"
+        android:entryValues="@array/ime_back_position_values"
+        android:summary="%s"
+        android:defaultValue="0"
+        android:dependency="sysui_show_nav_bar_ime" />
+
     <com.android.settingslib.widget.SliderPreference
         android:key="gesture_back_height"
         android:title="@string/back_height_title"
