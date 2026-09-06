@@ -809,6 +809,22 @@
                        android:value="@string/menu_key_connected_devices"/>
         </activity-alias>
 
+        <!-- NX809J: direct entry to the external-display page (display size / resolution),
+             linked from RedMagic Control. -->
+        <activity android:name="Settings$ExternalDisplaySettingsActivity"
+                  android:label="@string/external_display_settings_title"
+                  android:exported="true"
+                  android:theme="@style/Theme.Settings.NoActionBar">
+            <intent-filter android:priority="1">
+                <action android:name="com.android.settings.EXTERNAL_DISPLAY_SETTINGS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
+                       android:value="com.android.settings.connecteddevice.display.TabbedDisplayPreferenceFragment" />
+            <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY"
+                       android:value="@string/menu_key_connected_devices"/>
+        </activity>
+
         <activity android:name="Settings$FaceSettingsActivity"
             android:label="@string/security_settings_face_preference_title"
             android:exported="true"
