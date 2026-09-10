@@ -15590,4 +15590,6 @@
     <!-- Search keywords for Human interface device access setting -->
     <string name="keywords_access_hid">hid, human, access, device</string>
     <!-- Access HID end -->
+    <!-- Toast when the lock screen shortcuts picker cannot be opened -->
+    <string name="lockscreen_shortcuts_unavailable">Lock screen shortcuts editor is not available on this build</string>
 </resources>
