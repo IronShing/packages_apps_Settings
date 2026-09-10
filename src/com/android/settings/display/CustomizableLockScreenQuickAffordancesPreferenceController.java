@@ -58,7 +58,13 @@ public class CustomizableLockScreenQuickAffordancesPreferenceController extends
                     intent.setPackage(packageName);
                 }
                 intent.putExtra("destination", "quick_affordances");
-                mContext.startActivity(intent);
+                try {
+                    mContext.startActivity(intent);
+                } catch (android.content.ActivityNotFoundException e) {
+                    android.widget.Toast.makeText(mContext,
+                            R.string.lockscreen_shortcuts_unavailable,
+                            android.widget.Toast.LENGTH_SHORT).show();
+                }
                 return true;
             });
             refreshSummary(preference);
